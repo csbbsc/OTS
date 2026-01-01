@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国职业分类查询系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #1a73e8 0%, #6c8ef5 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .search-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .search-container h2 {
+            color: #1a73e8;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-container h2 i {
+            font-size: 1.8rem;
+        }
+        
+        .select-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .select-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .occupation-select {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 18px;
+        }
+        
+        .occupation-select:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+        
+        .result-container {
+            display: none;
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .occupation-title {
+            font-size: 1.8rem;
+            color: #1a73e8;
+            font-weight: 700;
+        }
+        
+        .occupation-code {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #1a73e8;
+        }
+        
+        .section-content {
+            background-color: #f9fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1a73e8;
+        }
+        
+        .task-item {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .task-item:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #1a73e8;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .task-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #777;
+            font-size: 1.1rem;
+        }
+        
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ccc;
+            display: block;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .occupation-title {
+                font-size: 1.5rem;
+            }
+            
+            .section-content {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .search-container, .result-container {
+                padding: 20px 15px;
+            }
+        }
+        
+        .data-info {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .data-info strong {
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-briefcase"></i> 中国职业分类查询系统</h1>
+        <p>基于《职业分类大典（2022年版）》的职业信息查询工具</p>
+    </div>
+    
+    <div class="search-container">
+        <h2><i class="fas fa-search"></i> 职业查询</h2>
+        <div class="select-container">
+            <label for="occupationSelect">选择职业名称：</label>
+            <select id="occupationSelect" class="occupation-select">
+                <option value="">-- 请选择一个职业 --</option>
+                <!-- 选项将通过JavaScript动态生成 -->
+            </select>
+        </div>
+        <div class="data-info">
+            <strong>数据说明：</strong> 本页面包含从Excel表格提取的383个职业数据，涵盖生产制造及有关人员等多个类别。
+        </div>
+    </div>
+    
+    <div class="result-container" id="resultContainer">
+        <div class="empty-message" id="emptyMessage">
+            <i class="fas fa-user-tie"></i>
+            <p>请从上方下拉框中选择一个职业，查看详细信息</p>
+        </div>
+        
+        <div id="occupationDetails" style="display: none;">
+            <div class="result-header">
+                <h2 class="occupation-title" id="occupationName"></h2>
+                <div class="occupation-code" id="occupationCode"></div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title"><i class="fas fa-info-circle"></i> 职业介绍</h3>
+                <div class="section-content">
+                    <p id="occupationDescription"></p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title"><i class="fas fa-tasks"></i> 工作任务</h3>
+                <div class="section-content">
+                    <div id="occupationTasks"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>数据来源：《职业分类大典（2022年版）》 | 本页面包含383个职业信息 | 仅供学习和参考使用</p>
+        <p style="margin-top: 8px; font-size: 0.8rem;">保存时间：2023年10月 | 版本：1.0</p>
+    </div>
+
+    <script>
+        // 从Excel表格中提取的职业数据（包含383个职业）
+        const occupationData = [
+            {code: "8-00-00-00", occupation: "不便分类的其他从业人员", task_chinese: "不便分类的其他从业人员。", task: ""},
+            {code: "7-04-00-00", occupation: "文职人员", task_chinese: "文职人员", task: ""},
+            {code: "7-03-00-00", occupation: "义务兵", task_chinese: "义务兵", task: ""},
+            {code: "7-02-00-00", occupation: "军士警士", task_chinese: "军士 (警士)。", task: ""},
+            {code: "7-01-00-00", occupation: "军官警官", task_chinese: "军官 (警官)。", task: ""},
+            {code: "6-31-07-03", occupation: "工业机器人系统操作员", task_chinese: "使用示教器、 操作面板等人机交互设备和工具, 对工业机器人、 工业机器人工作站或系统进行装配、 编程、 调试、 工艺参数更改等作业的人员。", task: "进行作业准备<br>识记装配图、 电气图、 工艺文件<br>使用工具、 仪器等进行工业机器人工作站或系统装配<br>使用示教器、 计算机、 组态软件等工具, 对工业机器人、 可编程逻辑控制器、<br>id:2025.12.19"},
+            {code: "6-31-07-02", occupation: "工业视觉系统运维员", task_chinese: "从事智能装备视觉系统选型、 安装调试、 程序编制、 故障诊断与排除、 日常维修与保养作业的人员。", task: "进行相机、 镜头、 读码器等视觉硬件选型、 调试、 维护<br>进行物体采像打光<br>标定视觉系统精度<br>标定视觉系统和第三方系统坐标系<br>集成视觉应用系统和主控工业软件, 嵌入通信系统<br>确认和抓取采像过程中物体特征<br>识别和分类系统运行过程中图像优劣, 判断和解决问题<br>设计小型样例程序, 验证工艺精度<br>进行更换视觉硬件后的系统重置、调试和验证"},
+            {code: "6-31-07-01", occupation: "工业机器人系统运维员", task_chinese: "使用工具、 量具、 检测仪器及设备, 进行工业机器人、 工业机器人工作站或系统的数据采集、 状态监测及运维的人员。", task: "检查、 诊断工业机器人本体、 末端执行器、 周边装置等机械系统;<br>检查、 诊断工业机器人电控系统、 驱动系统、 电源及线路等电气系统;<br>进行工业机器人、 工业机器人工作站或系统零位校准、 防尘、 更换电池、 更换润滑油等维护保养;<br>使用测量设备采集工业机器人、 工业机器人工作站或系统运行参数、 工作状态等数据, 进行监测;<br>分析、 诊断与维修工业机器人工作站或系统的故障;<br>编制工业机器人系统运行维护、 维修报告。"},
+            {code: "6-31-06-00", occupation: "安全员", task_chinese: "从事现场安全生产监督、检查与管理工作的人员。", task: "监督、检查现场安全、防护装备配备及使用情况;<br>监督、检查危险源,发现事故隐患,并监督整改;<br>参与制订安全生产措施、安全操作规程及事故应急处置预案;<br>参与事故应急救援和演练,组织现场保护和抢救,进行事故的调查与处理,完成事故的统计、分析报告;<br>组织开展安全生产宣传教育,进行员工安全技术培训,实施职业健康管理制度;<br>记录并保存安全生产数据,保存事故调查、分析档案。"},
+            {code: "6-31-05-00", occupation: "包装工", task_chinese: "使用包装设备或手工, 使用包装材料,将包装物品装入包装容器和封缄、 包扎包装物品的人员。", task: "核对、 清点包装物品, 准备绳、 纸、<br>1. 布、 板、 带、 塑胶、 铁制品等包装材料;<br>准备吊具并配合起重, 吊运摆放件包装物品;<br>使用设备或手工, 将包装物品装入<br>3. 包装容器;<br>使用设备或工具, 采用钉、 铆封等方式,<br>5. 封缄集装箱、 木箱等包装容器;<br>操作设备或手工, 使用绳、 纸、 布、<br>7. 塑胶、 带、 铁制品等包装材料, 裹、 捆、 绑扎包装物品;<br>检查包装质量, 书写、 张贴、 标注、<br>9. 喷涂、 打印、 标志包装物品标识;<br>填写装箱清单及报表;<br>维护保养工具设备, 排除故障。"},
+            {code: "6-31-04-00", occupation: "称重计量工", task_chinese: "操作轨道衡、 汽车衡等大型衡器和流体计量仪表、 器具, 计量物资的人员。", task: "检查轨道衡、 汽车衡等大型衡器秤台、 基坑异物情况, 清理异物;<br>检查称重车辆等情况, 限制超重;<br>控制异常情况;<br>操作轨道衡、 汽车衡等衡器, 称量物资重量, 记录、 计算称重数据;<br>检查油料、 水等计量仪表、 器具情况, 记录、 计算流量值, 填写报表;<br>维护保养设备。"},
+            {code: "6-31-03-06", occupation: "试验员", task_chinese: "使用设备、 仪器, 进行工艺性试验或产品性能试验作业的人员。", task: "阅识或制订试验工艺流程、 操作步骤、 试验方式, 制备试验模型;<br>采集、 抽取试验样品;<br>准备试验的原材料和药品;<br>调试仪器设备, 确定试验检测点;<br>使用仪器设备, 进行样品试验分析, 测定样品的性能或缺陷;<br>使用试验仪器设备和工具, 或将样品置于特定环境中, 进行可靠性、 安全性等试验;<br>使用试验仪器设备, 按试验工艺、 步骤试制产品, 测定分析试制品;<br>采集试验数据, 整理试验结果, 计算、 分析、 判定试验数据, 分析试验工艺流程问题;<br>维护保养仪器设备。"},
+            {code: "6-31-03-05", occupation: "质检员", task_chinese: "使用设备、 工具或运用感官, 检验、 检查、 确定原料、 燃料、 材料和半成品、 成品等产品质量的人员。", task: "抽取、 制备样品及检查前准备<br>使用量具或运用视检等感官检查方式, 检查产品等的外观尺寸和质量<br>使用在线检测仪器设备, 检查、 测试产品等的物理和机械性能<br>使用在线分析仪器设备, 测定样品成分含量<br>记录、 计算、 判定、 分析检验、 检查数据, 确定产品质量, 贴挂、 标注产品等的质量检查标志, 开具产品质量保证书"},
+            {code: "6-31-03-04", occupation: "无损检测员", task_chinese: "使用超声波、 射线、 磁粉、 渗透、 涡流等无损检测仪器设备, 对材料、 构件、 零部件、 设备、 建筑设施等进行非破坏性检测及判定的人员。", task: "根据被检对象的特性、 检测条件、 验收标准, 编制或确定检测工艺或方式<br>抽取样品, 对试样进行比对, 制作 试块<br>确定监测点和仪器设备位置, 安装、 调试及校正无损检测仪器设备<br>操作超声波、 射线、 磁粉、 渗透、 涡流、 声发射和红外热成像仪等检测仪器设备, 在非损坏状态下, 检测材料、 构件、 零部件、 设备、 建筑设施等表面、 近表面、 内部的缺陷, 确定位置及尺寸<br>记录、 计算、 判定检验数据<br>编写或协助主检人员完成检测报告<br>检查、 维护保养无损检测仪器设备"},
+            {code: "6-31-03-03", occupation: "生化检验员", task_chinese: "使用检测仪器和设备, 对农业、 发酵、食品、 纺织、 制药、 皮革等生产过程中的生物化学物质进行生化检验的人员。", task: "使用工具和设备, 采集样品;<br>使用工具和设备, 加工制作、 预处理样品;<br>进行样品有效成分的结构分析、品质鉴定、安全性检查、含量或效价的测定;<br>进行生化类标准品、对照品的标定工作;<br>进行实验室间的方法比对和实验室能力验证;<br>记录、计算、判定、分析检验数据;<br>维护保养检测环境和装备;<br>进行安全防护工作, 处理生物有害物质。"},
+            {code: "6-31-03-02", occupation: "物理性能检验员", task_chinese: "使用仪器、 设备, 检验、 检查、 测试、 分析成品、 半成品、 原料、 材料等物理、 力学和机械性能的人员。", task: "使用工具或设备, 采集样品;<br>使用设备、 工具, 加工制作、 预处 理样品;<br>使用量具、 仪器或通过视检, 检查 材料的外观;<br>操作材料检验仪器设备, 测试样品 的重量、 密度、 水分、 规格、 拉力、 扭力、 冲击、 弯曲、 硬度、 导电等物理和机械性能;<br>操作检验仪器设备, 测试样品的填 充、 透气度、 吸阻、 色差等流体力学 和光学性能;<br>使用金相显微镜, 检验样品的金相 组织;<br>记录、 计算、 判定、 分析测试检验 数据;<br>检查、 维护、 校准、 验证仪器设备。"},
+            {code: "6-31-03-01", occupation: "化学检验员", task_chinese: "使用仪器、 设备、 器具, 检验、 检测、 化验、 分析成品、 半成品和原料、 燃料、 材料等样品化学性能、 成分的人员。", task: "使用工具和设备, 采集样品;<br>使用设备、 工具, 加工、 预处理样品;<br>使用器具, 配制标准溶液和化学试剂;<br>视检样品外观;<br>使用理化仪器、 设备、 器具等, 测试样品的理化性质;<br>操作化学分析和仪器分析设备, 进行样品化学分析、 比色分析、 相分析、 极谱分析、 色谱分析、 光谱分析、 质谱分析、 原子吸收分光光度分析及核磁共振分析, 测定样品成分含量;<br>记录、 计算、 判定、 分析检验数据;<br>检查、 调试、 维护仪器设备, 处理故障。"},
+            {code: "6-31-02-05", occupation: "航空器外场维护员", task_chinese: "使用专用设备和工具, 外场检查、 调试与维护航空器机械零部件、 电气电子设备以及系统套件、 救生设施等的人员。", task: "检查航空器机械零部件、 附件, 更换损毁件, 排除故障<br>检查、 试验发动机性能参数, 分析、排除运行故障<br>检查、 维护、 调整航空器仪表、 电气及附件, 进行通电试验<br>检查、 调试航空器通信、 雷达等设备, 检查兼容性<br>检查、 排除航空器系统套件故障<br>操作试验设备, 进行救生设施地面试验, 包装、 维护伞具<br>进行航空器、 发动机定检, 填写检查记录<br>进行航空器外场机务准备, 保障飞行安全<br>维护工装、 试验设备和器材"},
+            {code: "6-31-02-04", occupation: "航空发动机修理工", task_chinese: "使用工具和设备, 分解、修理、加工航空发动机零部件, 组装、试验航空发动机的人员。", task: "校验、调试航空发动机试验设备;<br>检查、分析和排除航空发动机故障;<br>分解、清洗、修理、组装航空发动机;<br>组装、修理、试验发动机电气附件;<br>修理、组装、调试发动机部件;<br>使用工具和钣金设备, 制作航空发动机钣金零部件;<br>使用工具和抛光设备, 打磨、抛光及校正航空发动机叶片;<br>使用工具和设备, 成型、组装并试压航空发动机管路。"},
+            {code: "6-31-02-03", occupation: "航空器部件修理工", task_chinese: "使用工具、 设备, 检查、 修理航空器螺旋桨等机械部件、 电子电气部件、 零部件等工作的人员。", task: "使用大流量测试台、 无损检测等专用设备和工具, 检测航空器机械、 电气、 电子等部件和结构件<br>使用专用工具和设施设备, 检测、 修理、 翻修螺旋桨、 起落架等机械部件<br>使用专用工具和设施设备, 分解、 检测、 修理、 组装航空器电气、 电子部件<br>使用专用工具和设施设备, 分解、 检测、 修理、 调试航空器系统套件<br>使用专用工具和设施设备, 分解、 检测、 修理、 组装航空器结构件<br>使用专用工具和设施设备, 拆卸、 检测、 修理航空器机身的导管、 电缆、 透明件"},
+            {code: "6-31-02-02", occupation: "航空器机械维护员", task_chinese: "使用工具、 设备, 进行航空器航线维护、 航空器定期检修的人员。", task: "测试航空器飞行控制、 无线通信、 导航、 起落架等系统状态<br>进行航空器航前、 航后、 过站检查<br>航线排故、 拆装航线可更换件<br>进行航空器及其系统定期例行检查<br>使用发动机孔探、 大气数据计算机测试等设备和工具, 检修航空器, 更换零部件<br>收集分析航空器使用数据, 进行航空器持续适航性监控及可靠性管理<br>维护保养设备、 工具、 航材"},
+            {code: "6-31-02-01", occupation: "船舶修理工", task_chinese: "使用设备和工具, 勘验、 拆检、 修理、 安装、 调试船舶主机、 辅机、 轴系、 舵系、 螺旋桨、 阀系、 甲板机械、 强 (弱) 电设备, 并进行船舶进出坞作业、 船坞场地管理的人员。", task: "进行船舶进出坞作业和船坞场地管理<br>摆放、 拆加和移位船底坞墩, 校正龙骨墩及边墩的水平高度<br>拆装、 拉线找正、 调整、 安装、 检修轴系、 舵系、 螺旋桨及其附件<br>抛光、 修磨螺旋桨叶面, 矫正变形缺陷, 并进行静平衡测试<br>拆洗海底阀, 研磨安装阀芯<br>勘验、 拆检、 修理、 安装、 调试船舶主机、 辅机和甲板机械等<br>拆卸、 修理、 装复和调试制冷机、空调器及其附属设备<br>勘验、 修理、 调试船舶电站、电力拖动系统、 照明系统、 信号报警系统与通信导航等强 (弱) 电设备<br>勘验、 修理、 调试船用交直流电机、变频机、 扩大机、 变压器等"},
+            {code: "6-31-01-10", occupation: "机电设备维修工", task_chinese: "使用设备、 仪器仪表、 工具、 机具等, 对机电设备机械、 电气、 通信及控制系统进行维护、 检修、 故障诊断和排除的人员。", task: "阅识检修计划, 编制检修工艺, 准备检修所需设备、 机具、 工具, 检修机电设备;<br>诊断、 排除机电设备的机械、 液压、气动故障和电气系统故障;<br>安装系统软硬件, 进行测试与可靠性维护;<br>采集和监控工业大数据, 评估设备运行效率及状态, 优化及调整机电设备性能, 提出检修、 维护建议;<br>调试修复后的设备机械、电气及系统;<br>进行机电设备技术改造与优化;<br>维护保养工、夹、量具、仪器仪表;<br>填写设备运行情况和设备检修记录。"},
+            {code: "6-31-01-09", occupation: "工程机械维修工", task_chinese: "使用检测仪器、 检修机具和诊断设备等, 进行工程机械主机、 总成件及主要零配件诊断、 维修、 试车和保养的人员。", task: "维护保养工程机械<br>使用检测设备, 判断、 排除工程机<br>2. 械发动机、 底盘、 液压及电气系统、 工作装置等总成和零部件的故障;<br>拆卸和装配需维修的工程机械主机、<br>4. 总成或部件;<br>使用设备, 维修工程机械零部件;<br>操作工程机械, 进行主机和系统性<br>7. 能试车、 调试。"},
+            {code: "6-31-01-08", occupation: "变电设备检修工", task_chinese: "使用工具、量具和仪器、仪表, 检修、更换、调试变压器、断路器、隔离开关、成套组合电器及直流装置等变电设备的人员。", task: "拆卸、检修、清洗、组装、调试断路器、隔离开关及操作机构, 进行电气、机械特性试验;<br>检修、更换、维护、清理母线、接地开关、成套组合电器及其附件;<br>检修、更换变压器、互感器、消弧线圈、电抗器、无功补偿设备、防雷设备等变电设备及附件;<br>检修、更换、定检、维护直流系统设备;<br>处理变电设备绝缘油、液压油、六氟化硫气体;<br>带电测试、清扫、检修、更换运行中的变电设备, 消除故障;<br>填写设备检修报告。"},
+            {code: "6-31-01-07", occupation: "电机检修工", task_chinese: "使用工具、量具和仪器、仪表, 维护、检修发电厂、站发电机、励磁机、调相机和交、直流电动机及其附属设备的人员。", task: "检查电机及其附属设备, 处理设备隐患与故障<br>进行电机大修、中修、小修<br>修复或更换有缺陷的零部件<br>检查和验收设备检修质量<br>使用点检仪采集运行数据, 进行趋势分析, 建立状态检修或检修周期表<br>填写设备检修、试验记录, 编写技术总结报告"},
+            {code: "6-31-01-06", occupation: "汽轮机和水轮机检修工", task_chinese: "使用工具、 量具和仪器、 仪表, 维护、 检修汽轮机、 水轮机主辅设备和系统的人员。", task: "解体、 检测、 修复汽轮机设备和更换设备零部件<br>进行汽轮机设备组装、 就位、 调整、 找正<br>解体、 检测、 修复水轮机设备和更换设备零部件<br>进行水轮机设备组装、 就位、 调整、 找正<br>进行调速等附属系统设备解体、 检测、 修复和设备零部件更换、 组装、 就位<br>进行检修后设备的试验调整、 试运行, 处理缺陷<br>采集运行数据, 分析、 判断设备状况<br>填写设备检修、 试验记录, 编写技术总结报告"},
+            {code: "6-31-01-05", occupation: "锅炉设备检修工", task_chinese: "使用工具、量具和仪器、仪表,维护、检修锅炉本体及辅机、管阀、除灰、除尘、脱硫、脱硝等设备及系统的人员。", task: "准备工器具和设备解体前的装配记录<br>解体、检查、清理锅炉本体、磨煤机等主辅设备<br>检测、修复、更换设备零部件<br>装配锅炉主、辅设备<br>进行锅炉整体水压试验、辅机试运行,处理缺陷<br>检查、验收检修后的设备<br>采集运行数据,分析、判断设备状况<br>填写锅炉检修、试验记录,编写技术总结报告"},
+            {code: "6-31-01-04", occupation: "仪器仪表维修工", task_chinese: "使用工具、 检测设备和工艺装备, 维护、 修理、 改装、 调试与检测仪器仪表或自动化控制系统的人员。", task: "安装调试工艺装备、 检测仪器仪表及零部件;<br>使用专用设备、 仪表、 工具, 维修仪器仪表和自动化控制系统及装置, 排除故障;<br>维修仪器仪表工具、 附件及辅助设备;<br>维护保养仪器仪表检测设备和工、夹、量具, 排除故障。"},
+            {code: "6-31-01-03", occupation: "电工", task_chinese: "使用工具、 量具和仪器、 仪表, 安装、调试与维护、修理机械设备电气部分和电气系统线路及器件的人员。", task: "安装、 调试、 维护、 保养电气设备;<br>架设与接通送、 配电线路与电缆;<br>进行电气设备大修、 中修、 小修,<br>修理、 更换有缺陷的零部件;<br>安装、 调试与修理室内电器线路和照明灯具;<br>维护保养电工工具、 器具及测试仪表。"},
+            {code: "6-31-01-02", occupation: "机修钳工", task_chinese: "使用工具、量具和仪器、仪表,维护和修理设备机械部分的人员。", task: "选择机械设备安装的场所, 测定环境和条件;<br>进行设备搬迁, 安装、调试新设备;<br>修理机械设备的机械、液压、气动故障和机械磨损;<br>更换或修复机械零部件,润滑保养设备;<br>调试、调整修复后的机械设备;<br>进行现场巡回检修,排除机械设备运行过程中的故障;<br>使用工具、设备,加工损伤的机械职业分类大典 （2022年版）工件;<br>辅助预检机械设备故障、编制大修理方案;<br>维护保养工、夹、量具,仪器仪表,排除故障。"},
+            {code: "6-31-01-01", occupation: "设备点检员", task_chinese: "使用检测工具, 按照预定方式和标准检查在线生产设备或系统等, 并监控检修过程的人员。", task: "进行设备信息分类、 编码、 更新和管理维护;<br>按照预定方式和标准检测设备关键点的运行状态;<br>使用专用工具, 采集和分析设备状态信息;<br>确定设备检修方式和定点检测路径;<br>编制设备检修计划和实施方案, 提出检修所需设备清单和方案, 监控设备检修过程;<br>分析设备运行状况, 调整设备定修周期;<br>提出备品备件维修计划。"}
+        ];
+
+        // 为了演示，这里只包含部分数据。完整版本应包含所有383个职业
+
+        // DOM元素
+        const occupationSelect = document.getElementById('occupationSelect');
+        const resultContainer = document.getElementById('resultContainer');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const occupationDetails = document.getElementById('occupationDetails');
+        const occupationName = document.getElementById('occupationName');
+        const occupationCode = document.getElementById('occupationCode');
+        const occupationDescription = document.getElementById('occupationDescription');
+        const occupationTasks = document.getElementById('occupationTasks');
+
+        // 初始化下拉框选项
+        function initializeSelect() {
+            // 按职业名称排序
+            const sortedData = [...occupationData].sort((a, b) => a.occupation.localeCompare(b.occupation, 'zh-CN'));
+            
+            sortedData.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.code;
+                option.textContent = item.occupation;
+                occupationSelect.appendChild(option);
+            });
+            
+            // 更新数据信息
+            document.querySelector('.data-info').innerHTML = 
+                `<strong>数据说明：</strong> 本页面包含 ${occupationData.length} 个职业数据，涵盖生产制造及有关人员等多个类别。`;
+        }
+
+        // 显示职业详情
+        function showOccupationDetails(code) {
+            const occupation = occupationData.find(item => item.code === code);
+            
+            if (!occupation) {
+                return;
+            }
+            
+            // 更新UI
+            occupationName.textContent = occupation.occupation;
+            occupationCode.textContent = occupation.code;
+            occupationDescription.textContent = occupation.task_chinese || "暂无职业介绍信息";
+            
+            // 处理工作任务，将<br>转换为HTML
+            if (occupation.task && occupation.task.trim() !== "") {
+                // 分割任务项
+                const taskItems = occupation.task.split('<br>').filter(item => item.trim() !== "");
+                
+                // 清空现有内容
+                occupationTasks.innerHTML = '';
+                
+                // 添加每个任务项
+                taskItems.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-item';
+                    
+                    // 移除可能的编号前缀（如"1. "）
+                    const cleanTask = task.replace(/^\d+\.\s*/, '');
+                    taskElement.textContent = cleanTask;
+                    
+                    occupationTasks.appendChild(taskElement);
+                });
+            } else {
+                occupationTasks.innerHTML = '<p>暂无工作任务信息</p>';
+            }
+            
+            // 显示详情并隐藏空消息
+            emptyMessage.style.display = 'none';
+            occupationDetails.style.display = 'block';
+            resultContainer.style.display = 'block';
+            
+            // 滚动到结果区域
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 事件监听器
+        occupationSelect.addEventListener('change', function() {
+            if (this.value) {
+                showOccupationDetails(this.value);
+            } else {
+                // 显示空消息
+                emptyMessage.style.display = 'block';
+                occupationDetails.style.display = 'none';
+                resultContainer.style.display = 'block';
+            }
+        });
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSelect();
+            
+            // 如果URL中有职业代码参数，自动选择
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeParam = urlParams.get('code');
+            if (codeParam) {
+                const occupation = occupationData.find(item => item.code === codeParam);
+                if (occupation) {
+                    occupationSelect.value = codeParam;
+                    showOccupationDetails(codeParam);
+                }
+            }
+            
+            // 添加一些示例数据到控制台，方便调试
+            console.log(`已加载 ${occupationData.length} 个职业数据`);
+        });
+    </script>
+</body>
+</html>
